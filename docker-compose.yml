@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # Serviço do Banco de Dados
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: projeto_final_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Serviço da nossa API em Spring Boot
+  api:
+    # Constrói a imagem a partir do Dockerfile que estará na pasta ./backend
+    build: ./backend
+    restart: always
+    ports:
+      - "8080:8080" # Ajustado para a porta padrão do Spring Boot
+    depends_on:
+      - db # Garante que o 'db' inicie antes da 'api'
+    environment:
+      # Variáveis que o Spring Boot usará para se conectar ao banco
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/app_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+# Define o "HD Externo" para persistir os dados do banco
+volumes:
+  postgres_data:
